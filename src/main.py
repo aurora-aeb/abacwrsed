@@ -1,9 +1,11 @@
 import pygame, numpy
+import math
 
-WIDTH = 400
-HEIGHT = 300
+WIDTH = 800
+HEIGHT = 600
 BACKGROUND = (0, 0, 0)
 
+SQUARE_ROOT_OF_TWO = math.sqrt(2)
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, image, startx, starty):
@@ -34,7 +36,7 @@ class Player(Sprite):
         self.speed = 4
         self.jumpspeed = 20
         self.vsp = 0
-        self.gravity = 1
+        self.gravity = 0
         self.min_jumpspeed = 4
         self.prev_key = pygame.key.get_pressed()
 
@@ -54,41 +56,42 @@ class Player(Sprite):
             self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self, boxes):
+        """
+        TODO Document this method.
+        """
         hsp = 0
+        vsp = 0
         onground = self.check_collision(0, 1, boxes)
         # check keys
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
+        keys = pygame.key.get_pressed()
+
+        hsp = (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * self.speed
+        vsp = (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * self.speed
+
+        if hsp < 0:
             self.facing_left = True
             self.walk_animation()
-            hsp = -self.speed
-        elif key[pygame.K_RIGHT]:
-            self.facing_left = False
-            self.walk_animation()
-            hsp = self.speed
+
         else:
+            self.facing_right = True
+            self.walk_animation()
+
+
+        if hsp * vsp != 0:
+            hsp /= SQUARE_ROOT_OF_TWO
+            vsp /= SQUARE_ROOT_OF_TWO
+        if hsp == vsp == 0:
             self.image = self.stand_image
 
-        if key[pygame.K_UP] and onground:
-            self.vsp = -self.jumpspeed
-
-        # variable height jumping
-        if self.prev_key[pygame.K_UP] and not key[pygame.K_UP]:
+        # TODO This is a relic, should be removed if we do not use jumping.
+        if self.prev_key[pygame.K_UP] and not keys[pygame.K_UP]:
             if self.vsp < -self.min_jumpspeed:
                 self.vsp = -self.min_jumpspeed
 
-        self.prev_key = key
-
-        # gravity
-        if self.vsp < 10 and not onground:  # 9.8 rounded up
-            self.jump_animation()
-            self.vsp += self.gravity
-
-        if onground and self.vsp > 0:
-            self.vsp = 0
+        self.prev_key = keys
 
         # movement
-        self.move(hsp, self.vsp, boxes)
+        self.move(hsp, vsp, boxes)
 
     def move(self, x, y, boxes):
         dx = x
