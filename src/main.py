@@ -1,9 +1,9 @@
 import pygame, numpy
 import math
 
-WIDTH = 800
-HEIGHT = 600
-BACKGROUND = (0, 0, 0)
+WIDTH = 1920
+HEIGHT = 1080
+BACKGROUND = (55, 110, 100)
 
 SQUARE_ROOT_OF_TWO = math.sqrt(2)
 
@@ -33,7 +33,7 @@ class Player(Sprite):
         self.animation_index = 0
         self.facing_left = False
 
-        self.speed = 4
+        self.speed = 8
         self.jumpspeed = 20
         self.vsp = 0
         self.gravity = 0
@@ -68,14 +68,17 @@ class Player(Sprite):
         hsp = (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * self.speed
         vsp = (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * self.speed
 
-        if hsp < 0:
-            self.facing_left = True
-            self.walk_animation()
+        # MOVEMENT ANIMATION DISABLED FOR SIMPLIFIED TESTING [1]
+        
+        #if hsp < 0:
+        #    self.facing_left = True
+        #   self.walk_animation()
 
-        else:
-            self.facing_right = True
-            self.walk_animation()
+        #else:
+        #    self.facing_right = True
+        #    self.walk_animation()
 
+        # END OF DISABLE [1]
 
         if hsp * vsp != 0:
             hsp /= SQUARE_ROOT_OF_TWO
@@ -112,24 +115,49 @@ class Player(Sprite):
         return collide
 
 
-class Box(Sprite):
+class Wall_H(Sprite):
     def __init__(self, startx, starty):
-        super().__init__("boxAlt.png", startx, starty)
+        super().__init__("TempWall_H.png", startx, starty)
 
+class Wall_V(Sprite):
+    def __init__(self, startx, starty):
+        super().__init__("TempWall_V.png", startx, starty)
+
+class Wall_H_JD(Sprite):
+    def __init__(self, startx, starty):
+        super().__init__("TempWall_H_JD.png", startx, starty)
+
+class Wall_VE_JU(Sprite):
+    def __init__(self, startx, starty):
+        super().__init__("TempWall_VE_JU.png", startx, starty)
+
+class Barrier(Sprite):
+    def __init__(self, startx, starty):
+        super().__init__("Barrier.png", startx, starty)
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
-    player = Player(100, 200)
-
+    player = Player(100, 900)          #Player start location [WIDTH / 2, HEIGHT / 2]
+    
     boxes = pygame.sprite.Group()
-    for bx in range(0, 400, 70):
-        boxes.add(Box(bx, 300))
 
-    boxes.add(Box(330, 230))
-    boxes.add(Box(100, 70))
+    for bx in range(0, 2000, 70):
+        boxes.add(Wall_H(bx, 100))                              #Wall horizontal top row
+        boxes.add(Wall_H(bx, 1035))                             #Wall horizontal bottom row
+
+    for bx in range(5):
+        for by in range(170, 660, 70):
+            boxes.add(Wall_V(bx * 490, by))                     #Wall vertical
+            boxes.add(Wall_VE_JU(bx * 490, 730))                #Wall vertical end blocks
+            boxes.add(Wall_H_JD(bx * 490, 100))                 #Wall horizontal top junctions
+        for i in range(3):
+            boxes.add(Wall_H(((i - 1) * 70) + (bx * 490), 660)) #Wall horizontal middle chunks
+        for i in range(4):
+            boxes.add(Barrier((i * 70) + 630, 660))             #Barrier blocking access to one room
+
 
     while True:
         pygame.event.pump()
