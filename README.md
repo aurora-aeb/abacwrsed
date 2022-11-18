@@ -4,3 +4,4 @@
 - Head of Programming Support: Vince
 - Head of Inconvenience: Charlie
 - Head of Marketing: Raf
+- Head of Moral Support: Aurora
